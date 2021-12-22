@@ -1,17 +1,30 @@
 import React from 'react';
-import{Map, Marker, NavigationControl, InfoWindow,ZoomControl,ScaleControl} from 'react-bmapgl';
+import{MapApiLoaderHOC,Map, Marker, NavigationControl, InfoWindow,ZoomControl,ScaleControl,BMapGL} from 'react-bmapgl';
 import Polyline from 'react-bmapgl/Overlay/Polyline'
+import CustomOverlay from 'react-bmapgl/Overlay/CustomOverlay'
 import './index.css';
 
 
 class BMapComponent extends React.Component{
+  constructor(props){
+    super(props);
+    this.state={};
+    this.map=null
+  }
+  
   componentDidMount(){
-
+    console.log(this.map);
+    // this.map
   }
   render(){
     return (
       <div className='baidu-map'>
-      <Map center={{lng: 116.402544, lat: 39.928216}} zoom='8'>
+      <Map
+        enableScrollWheelZoom
+        enableRotate
+        onClick={(e)=>{console.log(e);}}
+        ref={ref=>{this.map = ref.map}}
+        center={{lng: 116.402544, lat: 39.928216}} zoom='8'>
         <Marker position={{lng: 116.402544, lat: 39.928216}}
             enableDragging
         />
@@ -28,6 +41,11 @@ class BMapComponent extends React.Component{
           strokeColor="#f00"
           strokeWeight={10}
         />
+        <CustomOverlay
+          enableDragging
+          position={new window.BMapGL.Point(116.35, 39.88)}>
+          <div>123</div>
+        </CustomOverlay>
       </Map>
       </div>
   )
@@ -35,4 +53,4 @@ class BMapComponent extends React.Component{
   
 }
 
-export default BMapComponent;
+export default MapApiLoaderHOC({ak:'A6QVRUvvOzfB1YtiYWd7nl2sqjXcYGUx'})(BMapComponent);

@@ -1,16 +1,19 @@
-import React,{useState} from 'react';
-import {Routes,Route, useNavigate } from 'react-router-dom';
+import React,{useEffect, useState} from 'react';
+import {Routes,Route, useNavigate, useLocation } from 'react-router-dom';
 import { Menu } from 'antd';
 import './App.css';
 import routers from './router';
 
 const  App = () => {
-  let navigate = useNavigate();
-    const [current,setCurrent] = useState('/home'),
-    handleClick = e => {
-      navigate(e.key);
-      setCurrent(e.key)
-    };
+  const navigate = useNavigate(),
+  location = useLocation(),
+  [current,setCurrent] = useState(location.pathname),
+  handleClick = e => {
+    navigate(e.key);
+    setCurrent(e.key)
+  };
+  useEffect(()=>{
+  },[])
   return (
     <>
       <Menu selectedKeys={[current]} onClick={(e)=>{handleClick(e)}} theme='dark' mode='horizontal'>

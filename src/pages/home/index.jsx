@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import {message, Table,Row,Col,Button,Modal,Form,Input,DatePicker,InputNumber,Radio,Typography,Space} from 'antd';
 import moment from 'moment';
 import {getUserList,addUser,getDetail,updateUser,deleteUser} from '../../api/index';
-import  './index.less';
+import  './index.scss';
 const {Link,Text} = Typography;
 
 const Home = ()=>{

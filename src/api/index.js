@@ -16,10 +16,11 @@ http.interceptors.response.use((response)=>{
 
 
 //获取用户列表
-export const getUserList = ()=>{
+export const getUserList = (params)=>{
   return http({
     url:'user-list',
     method:'GET',
+    params
   })
 }
 
@@ -56,5 +57,17 @@ export const deleteUser = (data) =>{
     url:'del-user',
     method:'DELETE',
     data
+  })
+}
+
+//图片上传
+export const uploadImg = (data)=>{
+  return http({
+    url:'/upload',
+    method:'POST',
+    data:data,
+    headers:{
+      'Content-Type': 'multipart/form-data'
+    }
   })
 }

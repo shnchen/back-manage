@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
-import {message, Table,Row,Col,Button,Modal,Form,Input,DatePicker,InputNumber,Radio,Typography,Space} from 'antd';
+import {message, Table,Row,Col,Button,Modal,Form,Input,DatePicker,InputNumber,Radio,Typography,Space,Upload,Avatar} from 'antd';
 import moment from 'moment';
-import {getUserList,addUser,getDetail,updateUser,deleteUser} from '../../api/index';
+import {getUserList,addUser,getDetail,updateUser,deleteUser,uploadImg} from '../../api/index';
 import  './index.scss';
 const {Link,Text} = Typography;
 
@@ -11,10 +11,19 @@ const Home = ()=>{
   const [show,setShow] = useState(false);
   const [detail,setDetail] = useState();
   const [registryTime,setRegistryTime] = useState();
-  const getUserInfoList = async ()=>{
-    const res = await getUserList();
+  const [current,setCurrent] = useState(1);
+  const [fileList,setFileList] = useState([]);
+  const [imgList,setImgList] = useState([])
+  const pageSize= 10;
+  const [total,setTotal] = useState(0);
+  const getUserInfoList = async (pageNum)=>{
+    const res = await getUserList({
+      pageNum:pageNum||current,
+      pageSize:pageSize,
+    });
     if(res.status===200){
-      setDataTable(res.list);
+      setDataTable(res.data.list);
+      setTotal(res.data.total)
     }else{
       message.error(res.message)
     }
@@ -25,6 +34,9 @@ const Home = ()=>{
     getUserInfoList();
     setShow(false);
     setRegistryTime(undefined);
+    form.resetFields();
+    setImgList([]);
+    setFileList([]);
   }
   const getDetailFun = async (id)=>{
     let res = await getDetail({_id:id});
@@ -35,7 +47,8 @@ const Home = ()=>{
         gender:res.data.gender,
         age:res.data.age,
       })
-     
+      setImgList(res.data.headUrl);
+      setFileList(res.data.headUrl);
       res.data.registryTime && setRegistryTime(moment(res.data.registryTime))
       setShow(true);
     }else{
@@ -48,13 +61,46 @@ const Home = ()=>{
     getUserInfoList();
     setShow(false);
     setRegistryTime(undefined);
+    setImgList([]);
+    setFileList([]);
   }
   const deleteData = async (id) =>{
     const res = await deleteUser({id});
     message[res.status===200?'success':'error'](res.message);
     getUserInfoList();
   }
+  const imgUpload = async (file)=>{
+    const res = await uploadImg(file);
+    if(res.status===200){
+      setImgList([{
+        uid:res.filename,
+        status:'done',
+        name:res.originalname,
+        url:res.url
+      }])
+    }
+    message[res.status===200?'success':'error'](res.message);
+  }
+  const fileChange = (e)=>{
+    if(e.fileList.length>0){
+      e.fileList.map(item=>{
+        if(item.status === "uploading" ){
+          item.status = 'done'
+        }
+      })
+    }
+    setFileList(e.fileList);
+  }
   const columns = [
+    {
+      title:"ID",
+      dataIndex:'_id'
+    },
+    {
+      title:"头像",
+      dataIndex:'headUrl',
+      render:(url)=> <Avatar src={url[0].url} />
+    },
     {
       title:'姓名',
       dataIndex:'name'
@@ -109,6 +155,15 @@ const Home = ()=>{
         rowKey={(row)=>row._id}
         dataSource={tableData}
         columns={columns} 
+        pagination={{
+          total,
+          current,
+          pageSize,
+          onChange:(page)=>{
+            setCurrent(page);
+            getUserInfoList(page);
+          }
+        }}
        />
         <Modal
           destroyOnClose
@@ -120,7 +175,8 @@ const Home = ()=>{
               name,
               gender,
               age,
-              registryTime:+registryTime
+              registryTime:+registryTime,
+              headUrl:imgList
             }
             detail?updateFun({
               _id:detail._id,
@@ -132,6 +188,8 @@ const Home = ()=>{
             setShow(false);
             setDetail(undefined);
             setRegistryTime(undefined);
+            setFileList([]);
+            setImgList([]);
           }}
           >
           <Form
@@ -156,6 +214,21 @@ const Home = ()=>{
               <DatePicker value={registryTime} onChange={(e)=>{
                 setRegistryTime(e)
               }} />
+            </Form.Item>
+            <Form.Item  label="上传照片">
+              <Upload
+                listType="picture-card"
+                fileList={fileList}
+                onPreview={(e)=>{console.log(e);}}
+                customRequest={(e)=>{
+                  const formData=new FormData();  
+                  formData.append('file',e.file);
+                  imgUpload(formData);
+                }}
+                onChange={fileChange}
+              >
+                {fileList.length < 1 && '+ Upload'}
+              </Upload>
             </Form.Item>
         </Form>
       </Modal>

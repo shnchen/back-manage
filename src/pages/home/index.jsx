@@ -14,7 +14,7 @@ const Home = ()=>{
   const [current,setCurrent] = useState(1);
   const [fileList,setFileList] = useState([]);
   const [imgList,setImgList] = useState([])
-  const pageSize= 10;
+  const pageSize= 1;
   const [total,setTotal] = useState(0);
   const getUserInfoList = async (pageNum)=>{
     const res = await getUserList({
@@ -22,6 +22,7 @@ const Home = ()=>{
       pageSize:pageSize,
     });
     if(res.status===200){
+      console.log(res.data);
       setDataTable(res.data.list);
       setTotal(res.data.total)
     }else{
@@ -39,14 +40,16 @@ const Home = ()=>{
     setFileList([]);
   }
   const getDetailFun = async (id)=>{
-    let res = await getDetail({_id:id});
+    let res = await getDetail({id:id});//_id
     if(res.status === 200){
+      console.log(res);
       setDetail(res.data);
       form.setFieldsValue({
         name:res.data.name,
         gender:res.data.gender,
         age:res.data.age,
       })
+      res.data.headUrl = typeof res.data.headUrl ==='object'?res.data.headUrl :JSON.parse(res.data.headUrl)
       setImgList(res.data.headUrl);
       setFileList(res.data.headUrl);
       res.data.registryTime && setRegistryTime(moment(res.data.registryTime))
@@ -94,12 +97,12 @@ const Home = ()=>{
   const columns = [
     {
       title:"ID",
-      dataIndex:'_id'
+      dataIndex:'id'//'_id'||
     },
     {
       title:"头像",
       dataIndex:'headUrl',
-      render:(url)=> <Avatar src={url[0].url} />
+      render:(url)=>  <Avatar src={typeof url==='string'?JSON.parse(url)[0]?JSON.parse(url)[0].url:'':url[0].url} />
     },
     {
       title:'姓名',
@@ -127,7 +130,7 @@ const Home = ()=>{
     },
     {
       title:'操作',
-      dataIndex:"_id",
+      dataIndex: 'id', //"_id",
       render:(id)=>(<Space>
         <Link onClick={()=>{getDetailFun(id);}}>编辑</Link>
         <Text type='danger' style={{cursor:'pointer'}}  onClick={()=>{deleteData(id);}}>删除</Text>
@@ -152,7 +155,8 @@ const Home = ()=>{
           </Col>
       </Row>
       <Table
-        rowKey={(row)=>row._id}
+        rowKey={(row)=>row.id //_id
+        }
         dataSource={tableData}
         columns={columns} 
         pagination={{
@@ -175,11 +179,12 @@ const Home = ()=>{
               name,
               gender,
               age,
-              registryTime:+registryTime,
+              registryTime:moment(registryTime).format('YYYY-MM-DD'),
               headUrl:imgList
             }
             detail?updateFun({
-              _id:detail._id,
+              // _id:detail._id,
+              id:detail.id,
               ...params
             }):addUserFun(params)
           }}

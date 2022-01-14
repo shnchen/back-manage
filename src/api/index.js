@@ -3,7 +3,8 @@ import axios from "axios";
 
 
 const http = axios.create({
-  baseURL:'http://api-mysite.com:9999/',
+  // baseURL:'http://api-mysite.com:9999/',
+  baseURL:'http://127.0.0.1:9998/',
   timeout:10000
 })
 

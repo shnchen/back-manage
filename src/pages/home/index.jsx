@@ -14,7 +14,7 @@ const Home = ()=>{
   const [current,setCurrent] = useState(1);
   const [fileList,setFileList] = useState([]);
   const [imgList,setImgList] = useState([])
-  const pageSize= 1;
+  const pageSize= 10;
   const [total,setTotal] = useState(0);
   const getUserInfoList = async (pageNum)=>{
     const res = await getUserList({
@@ -40,7 +40,7 @@ const Home = ()=>{
     setFileList([]);
   }
   const getDetailFun = async (id)=>{
-    let res = await getDetail({id:id});//_id
+    let res = await getDetail({_id:id});//_id
     if(res.status === 200){
       console.log(res);
       setDetail(res.data);
@@ -97,40 +97,40 @@ const Home = ()=>{
   const columns = [
     {
       title:"ID",
-      dataIndex:'id'//'_id'||
+      dataIndex:'_id'//'_id'||
     },
-    {
-      title:"头像",
-      dataIndex:'headUrl',
-      render:(url)=>  <Avatar src={typeof url==='string'?JSON.parse(url)[0]?JSON.parse(url)[0].url:'':url[0].url} />
-    },
+    // {
+    //   title:"头像",
+    //   dataIndex:'headUrl',
+    //   render:(url)=>  <Avatar src={typeof url==='string'?JSON.parse(url)[0]?JSON.parse(url)[0].url:'':url[0]?url[0].url:''} />
+    // },
     {
       title:'姓名',
       dataIndex:'name'
     },
-    {
-      title:'性别',
-      dataIndex:'gender',
-      render:(gender)=>{
-       return ['未知','男','女'][+gender]
-      }
-    },
-    {
-      title:'年龄',
-      dataIndex:'age'
-    },
-    {
-      title:'注册时间',
-      dataIndex:'registryTime',
-      render:(time)=>{
-        if(!time){
-          return '';
-        }
-        return moment(time).format("YYYY-MM-DD")}
-    },
+    // {
+    //   title:'性别',
+    //   dataIndex:'gender',
+    //   render:(gender)=>{
+    //    return ['未知','男','女'][+gender]
+    //   }
+    // },
+    // {
+    //   title:'年龄',
+    //   dataIndex:'age'
+    // },
+    // {
+    //   title:'注册时间',
+    //   dataIndex:'registryTime',
+    //   render:(time)=>{
+    //     if(!time){
+    //       return '';
+    //     }
+    //     return moment(time).format("YYYY-MM-DD")}
+    // },
     {
       title:'操作',
-      dataIndex: 'id', //"_id",
+      dataIndex: '_id', //"_id",
       render:(id)=>(<Space>
         <Link onClick={()=>{getDetailFun(id);}}>编辑</Link>
         <Text type='danger' style={{cursor:'pointer'}}  onClick={()=>{deleteData(id);}}>删除</Text>
@@ -155,7 +155,7 @@ const Home = ()=>{
           </Col>
       </Row>
       <Table
-        rowKey={(row)=>row.id //_id
+        rowKey={(row)=>row._id //_id
         }
         dataSource={tableData}
         columns={columns} 
@@ -183,8 +183,8 @@ const Home = ()=>{
               headUrl:imgList
             }
             detail?updateFun({
-              // _id:detail._id,
-              id:detail.id,
+              _id:detail._id,
+              // id:detail.id,
               ...params
             }):addUserFun(params)
           }}

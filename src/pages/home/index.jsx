@@ -1,8 +1,9 @@
 import React,{useEffect,useState} from 'react';
-import {message, Table,Row,Col,Button,Modal,Form,Input,DatePicker,InputNumber,Radio,Typography,Space,Upload,Avatar} from 'antd';
+import {message, Table,Row,Col,Button,Modal,Form,Input,DatePicker,InputNumber,Radio,Typography,Space,Upload} from 'antd';
 import moment from 'moment';
 import {getUserList,addUser,getDetail,updateUser,deleteUser,uploadImg} from '../../api/index';
 import  './index.scss';
+import axios from 'axios';
 const {Link,Text} = Typography;
 
 const Home = ()=>{
@@ -40,7 +41,7 @@ const Home = ()=>{
     setFileList([]);
   }
   const getDetailFun = async (id)=>{
-    let res = await getDetail({_id:id});//_id
+    let res = await getDetail({id:id});//_id
     if(res.status === 200){
       console.log(res);
       setDetail(res.data);
@@ -73,6 +74,7 @@ const Home = ()=>{
     getUserInfoList();
   }
   const imgUpload = async (file)=>{
+    console.log(file,77777);
     const res = await uploadImg(file);
     if(res.status===200){
       setImgList([{
@@ -90,6 +92,7 @@ const Home = ()=>{
         if(item.status === "uploading" ){
           item.status = 'done'
         }
+        return <></>
       })
     }
     setFileList(e.fileList);
@@ -97,7 +100,7 @@ const Home = ()=>{
   const columns = [
     {
       title:"ID",
-      dataIndex:'_id'//'_id'||
+      dataIndex:'id'//'_id'||
     },
     // {
     //   title:"头像",
@@ -130,7 +133,7 @@ const Home = ()=>{
     // },
     {
       title:'操作',
-      dataIndex: '_id', //"_id",
+      dataIndex: 'id', //"_id",
       render:(id)=>(<Space>
         <Link onClick={()=>{getDetailFun(id);}}>编辑</Link>
         <Text type='danger' style={{cursor:'pointer'}}  onClick={()=>{deleteData(id);}}>删除</Text>
@@ -146,6 +149,7 @@ const Home = ()=>{
           <Col span={20}></Col>
           <Col span={4}>
             <Button
+            className='btn'
               type='primary'  
               onClick={()=>{
                   setShow(true)
@@ -155,7 +159,7 @@ const Home = ()=>{
           </Col>
       </Row>
       <Table
-        rowKey={(row)=>row._id //_id
+        rowKey={(row)=>row.id //_id
         }
         dataSource={tableData}
         columns={columns} 
@@ -183,8 +187,8 @@ const Home = ()=>{
               headUrl:imgList
             }
             detail?updateFun({
-              _id:detail._id,
-              // id:detail.id,
+              // _id:detail._id,
+              id:detail.id,
               ...params
             }):addUserFun(params)
           }}
@@ -231,6 +235,10 @@ const Home = ()=>{
                   imgUpload(formData);
                 }}
                 onChange={fileChange}
+                onRemove={(e)=>{
+                  console.log(e);
+                  setImgList([])
+                }}
               >
                 {fileList.length < 1 && '+ Upload'}
               </Upload>

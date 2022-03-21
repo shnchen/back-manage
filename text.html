@@ -1,0 +1,877 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://wow.techbrood.com/libs/jquery/jquery-1.11.1.min.js"></script>
+  <style>
+    svg {
+    background-color: lightyellow;
+    cursor: pointer;
+    display: block;
+    height: 320px;
+    margin: 20px auto;
+    width: 480px;
+}
+svg .scatter-chart__axis-tick,
+svg .scatter-chart__axis-line {
+    stroke: darkgray;
+}
+svg .scatter-chart__axis-text,
+svg .scatter-chart__axis-text {
+    font-family: sans-serif;
+    font-size: 14px;
+}
+svg .scatter-chart__point {
+    fill: steelblue;
+}
+p {
+    text-align: center;
+}
+  </style>
+</head>
+<body>
+  <div id="js-app" onClick="changeData()"></div>
+<p>Click chart to change data sets</p>
+</body>
+</html>
+
+
+
+<script src="./node_modules/react"></script>
+<script src="./node_modules/react-dom"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.2/lib/alea.js"></script>
+
+<script>
+  'use strict';
+var _extends = Object.assign || function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+};
+
+var _class, _temp, _class2, _temp2;
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var HorizontalAxis = (_temp = _class = function(_React$Component) {
+    _inherits(HorizontalAxis, _React$Component);
+
+    function HorizontalAxis() {
+        _classCallCheck(this, HorizontalAxis);
+
+        return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+    }
+
+    HorizontalAxis.prototype.buildTicks = function buildTicks(tickValues, scale, labelFn, orientation, margins) {
+        var height = margins[2];
+        if (orientation === HorizontalAxis.orientation.TOP) {
+            height = margins[0];
+        }
+        return tickValues.map(function(tickValue, key) {
+            var tickLength = height / 6;
+            var xPos = scale(tickValue);
+            var y2 = height;
+            var y1 = y2 - tickLength;
+            if (orientation === HorizontalAxis.orientation.BOTTOM) {
+                y1 = 0;
+                y2 = tickLength;
+            }
+            var transform = 'translate(' + xPos + ', 0)';
+            return React.createElement(
+                'g', {
+                    transform: transform,
+                    key: key
+                },
+                React.createElement('line', _extends({
+                    y1: y1,
+                    y2: y2
+                }, {
+                    className: 'scatter-chart__axis-tick scatter-chart__axis-tick--horizontal',
+                    x1: 0,
+                    x2: 0
+                })),
+                React.createElement(
+                    'text', {
+                        dy: '1.4em',
+                        className: 'scatter-chart__axis-text scatter-chart__axis-text--horizontal',
+                        textAnchor: 'middle',
+                        x: 0,
+                        y: 0
+                    },
+                    labelFn(tickValue)
+                )
+            );
+        });
+    };
+
+    HorizontalAxis.prototype.render = function render() {
+        var _props = this.props;
+        var scale = _props.scale;
+        var view = _props.view;
+        var margins = _props.margins;
+        var labelFn = _props.labelFn;
+        var tickValues = _props.tickValues;
+        var orientation = _props.orientation;
+        var width = view[0];
+        var height = view[1];
+
+        var yPos = height;
+        if (orientation === HorizontalAxis.orientation.TOP) {
+            yPos = 0;
+        }
+        var transform = 'translate(0, ' + yPos + ')';
+        return React.createElement(
+            'g', {
+                transform: transform
+            },
+            React.createElement('line', {
+                className: 'scatter-chart__axis-line scatter-chart__axis-line--horizontal',
+                x1: 0,
+                y1: 0,
+                x2: width,
+                y2: 0
+            }),
+            this.buildTicks(tickValues, scale, labelFn, orientation, margins)
+        );
+    };
+
+    return HorizontalAxis;
+}(React.Component), _class.propTypes = {
+    labelFn: React.PropTypes.func.isRequired,
+    margins: React.PropTypes.array.isRequired,
+    orientation: React.PropTypes.string.isRequired,
+    scale: React.PropTypes.func.isRequired,
+    tickValues: React.PropTypes.array.isRequired,
+    view: React.PropTypes.array.isRequired
+}, _class.orientation = {
+    BOTTOM: 'horizontal-axis-bottom',
+    TOP: 'horizontal-axis-top'
+}, _temp);
+var VerticalAxis = (_temp2 = _class2 = function(_React$Component2) {
+    _inherits(VerticalAxis, _React$Component2);
+
+    function VerticalAxis() {
+        _classCallCheck(this, VerticalAxis);
+
+        return _possibleConstructorReturn(this, _React$Component2.apply(this, arguments));
+    }
+
+    VerticalAxis.prototype.buildTicks = function buildTicks(tickValues, scale, labelFn, orientation, margins) {
+        var width = margins[3];
+        if (orientation === HorizontalAxis.orientation.RIGHT) {
+            width = margins[1];
+        }
+        return tickValues.map(function(tickValue, key) {
+            var tickLength = width / 6;
+            var yPos = scale(tickValue);
+            var x2 = width;
+            var x1 = x2 - tickLength;
+            var anchorPosition = 'end';
+            var textXPos = x1 - tickLength;
+            if (orientation === VerticalAxis.orientation.RIGHT) {
+                x1 = 0;
+                x2 = tickLength;
+                anchorPosition = 'start';
+            }
+            var transform = 'translate(0, ' + yPos + ')';
+            return React.createElement(
+                'g', {
+                    transform: transform,
+                    key: key
+                },
+                React.createElement('line', _extends({
+                    x1: x1,
+                    x2: x2
+                }, {
+                    className: 'scatter-chart__axis-tick scatter-chart__axis-tick--vertical',
+                    y1: 0,
+                    y2: 0
+                })),
+                React.createElement(
+                    'text', {
+                        dy: 3,
+                        className: 'scatter-chart__axis-text scatter-chart__axis-text--vertical',
+                        textAnchor: anchorPosition,
+                        x: textXPos,
+                        y: 0
+                    },
+                    labelFn(tickValue)
+                )
+            );
+        });
+    };
+
+    VerticalAxis.prototype.render = function render() {
+        var _props2 = this.props;
+        var scale = _props2.scale;
+        var view = _props2.view;
+        var margins = _props2.margins;
+        var labelFn = _props2.labelFn;
+        var tickValues = _props2.tickValues;
+        var orientation = _props2.orientation;
+
+        var width = margins[3];
+        var x1 = width;
+        var xPos = -width;
+        if (orientation === VerticalAxis.orientation.RIGHT) {
+            width = margins[1];
+            xPos = view[0];
+            x1 = 0;
+        }
+        var x2 = x1;
+        var transform = 'translate(' + xPos + ', 0)';
+        return React.createElement(
+            'g', {
+                transform: transform
+            },
+            React.createElement('line', _extends({
+                x1: x1,
+                x2: x2
+            }, {
+                className: 'scatter-chart__axis-line scatter-chart__axis-line--vertical',
+                y1: 0,
+                y2: view[1]
+            })),
+            this.buildTicks(tickValues, scale, labelFn, orientation, margins)
+        );
+    };
+
+    return VerticalAxis;
+}(React.Component), _class2.propTypes = {
+    labelFn: React.PropTypes.func.isRequired,
+    margins: React.PropTypes.array.isRequired,
+    orientation: React.PropTypes.string.isRequired,
+    scale: React.PropTypes.func.isRequired,
+    tickValues: React.PropTypes.array.isRequired,
+    view: React.PropTypes.array.isRequired
+}, _class2.orientation = {
+    LEFT: 'horizontal-axis-left',
+    RIGHT: 'horizontal-axis-right'
+}, _temp2);
+
+
+var _extends = Object.assign || function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+};
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var AnimatedScaleWrapper = function AnimatedScaleWrapper() {
+    var scaleProps = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+    var transitionDuration = arguments.length <= 1 || arguments[1] === undefined ? 300 : arguments[1];
+    return function(ComposedComponent) {
+        return function(_React$Component) {
+            _inherits(_class, _React$Component);
+
+            function _class(props) {
+                _classCallCheck(this, _class);
+
+                var _this = _possibleConstructorReturn(this, _React$Component.call(this, props));
+
+                _this.state = scaleProps.map(function(scaleProp) {
+                    var _ref;
+
+                    var scale = _this.props[scaleProp];
+
+                    var _scale$domain = scale.domain();
+
+                    var domainMin = _scale$domain[0];
+                    var domainMax = _scale$domain[1];
+
+                    return _ref = {}, _ref[scaleProp + 'Min'] = domainMin, _ref[scaleProp + 'Max'] = domainMax, _ref;
+                }).reduce(function(prev, curr) {
+                    return _extends({}, prev, curr);
+                }, {});
+                return _this;
+            }
+
+            _class.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+                var _this2 = this;
+
+                var scalesUnchanged = scaleProps.map(function(scaleProp) {
+                    var _nextProps$scaleProp$ = nextProps[scaleProp].domain();
+
+                    var nextDomainMin = _nextProps$scaleProp$[0];
+                    var nextDomainMax = _nextProps$scaleProp$[1];
+
+                    var _props$scaleProp$doma = _this2.props[scaleProp].domain();
+
+                    var domainMin = _props$scaleProp$doma[0];
+                    var domainMax = _props$scaleProp$doma[1];
+
+                    return nextDomainMin === domainMin && nextDomainMax === domainMax;
+                }).reduce(function(prev, curr) {
+                    return curr && prev;
+                }, true);
+                if (scalesUnchanged) {
+                    return;
+                }
+                d3.select(this).transition().tween('attr.scale', null);
+                d3.select(this).transition().duration(transitionDuration).ease(d3.easeLinear).tween('attr.scale', function() {
+                    var interpolators = scaleProps.map(function(scaleProp) {
+                        var _nextProps$scaleProp$2 = nextProps[scaleProp].domain();
+
+                        var nextDomainMin = _nextProps$scaleProp$2[0];
+                        var nextDomainMax = _nextProps$scaleProp$2[1];
+
+                        var minInterpolator = d3.interpolateNumber(_this2.state[scaleProp + 'Min'], nextDomainMin);
+                        var maxInterpolator = d3.interpolateNumber(_this2.state[scaleProp + 'Max'], nextDomainMax);
+                        return {
+                            scaleProp: scaleProp,
+                            minInterpolator: minInterpolator,
+                            maxInterpolator: maxInterpolator
+                        };
+                    });
+                    return function(t) {
+                        var newState = interpolators.map(function(_ref2) {
+                            var _ref3;
+
+                            var scaleProp = _ref2.scaleProp;
+                            var minInterpolator = _ref2.minInterpolator;
+                            var maxInterpolator = _ref2.maxInterpolator;
+                            return _ref3 = {}, _ref3[scaleProp + 'Min'] = minInterpolator(t), _ref3[scaleProp + 'Max'] = maxInterpolator(t), _ref3;
+                        }).reduce(function(prev, curr) {
+                            return _extends({}, prev, curr);
+                        }, {});
+                        _this2.setState(newState);
+                    };
+                });
+            };
+
+            _class.prototype.render = function render() {
+                var props = this.props;
+                var state = this.state;
+
+                var newScaleProps = scaleProps.map(function(scaleProp) {
+                    var _ref4;
+
+                    var scale = props[scaleProp];
+                    var domainMin = state[scaleProp + 'Min'];
+                    var domainMax = state[scaleProp + 'Max'];
+                    var newScale = scale.copy();
+                    newScale.domain([domainMin, domainMax]);
+                    return _ref4 = {}, _ref4[scaleProp] = newScale, _ref4;
+                }).reduce(function(prev, curr) {
+                    return _extends({}, prev, curr);
+                }, {});
+                var newProps = _extends({}, props, newScaleProps);
+                return React.createElement(ComposedComponent, newProps);
+            };
+
+            return _class;
+        }(React.Component);
+    };
+};
+
+
+
+var _class, _temp, _class2, _temp3, _class3, _temp4;
+
+var _extends = Object.assign || function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+};
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+function _possibleConstructorReturn(self, call) {
+    if (!self) {
+        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+        constructor: {
+            value: subClass,
+            enumerable: false,
+            writable: true,
+            configurable: true
+        }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+var seed = 5625463739;
+
+var random = function() {
+    var s = seed;
+    return function() {
+        return alea(s++)();
+    };
+}();
+
+setTimeout(function() {
+    var data = generateData(100);
+    var filteredData = [];
+    data.forEach(function(_ref) {
+        var duration = _ref.duration;
+        var rating = _ref.rating;
+        var key = _ref.key;
+
+        if (duration < 100 || duration > 110) {
+            return;
+        }
+        if (rating < 4 || rating > 6) {
+            return;
+        }
+        filteredData.push({
+            duration: duration,
+            rating: rating,
+            key: key
+        });
+    });
+    renderChart(data);
+    var useFilteredData = false;
+    window.changeData = function() {
+        useFilteredData = !useFilteredData;
+        renderChart(useFilteredData ? filteredData : data);
+    };
+}, 0);
+
+function renderChart(data) {
+    ReactDOM.render(React.createElement(ScatterChart, _extends({
+        size: [480, 320],
+        margins: [20, 20, 40, 40],
+        yField: 'rating',
+        xField: 'duration'
+    }, {
+        data: data
+    })), document.getElementById('js-app'));
+}
+
+var normalDist = function normalDist() {
+    var halfRange = 0.5;
+    var r = function r() {
+        return random() + random();
+    };
+    var v = [r(), r(), r()];
+    var norm = (v.reduce(function(p, c) {
+        return p + c;
+    }, 0) - v.length) / v.length;
+    return norm * halfRange + halfRange;
+};
+
+function generateData(size) {
+    return d3.range(size).map(function() {
+        return {
+            duration: Math.floor(normalDist() * 90) + 60,
+            key: Math.floor(random() * 0xffffff * +new Date()).toString(36),
+            rating: Math.floor(normalDist() * 100) / 10
+        };
+    });
+}
+
+var ScatterChart = (_temp = _class = function(_React$Component) {
+    _inherits(ScatterChart, _React$Component);
+
+    function ScatterChart() {
+        _classCallCheck(this, ScatterChart);
+
+        return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+    }
+
+    ScatterChart.prototype.buildHorizontalAxis = function buildHorizontalAxis(scale, view, margins) {
+        var orientation = HorizontalAxis.orientation.BOTTOM;
+        var tickValues = scale.ticks();
+        var labelFn = function labelFn(value) {
+            return value;
+        };
+        return React.createElement(AnimatedHorizontalAxis, {
+            scale: scale,
+            view: view,
+            margins: margins,
+            tickValues: tickValues,
+            orientation: orientation,
+            labelFn: labelFn
+        });
+    };
+
+    ScatterChart.prototype.buildVerticalAxis = function buildVerticalAxis(scale, view, margins) {
+        var orientation = VerticalAxis.orientation.LEFT;
+        var tickValues = scale.ticks();
+        var labelFn = function labelFn(value) {
+            return value;
+        };
+        return React.createElement(AnimatedVerticalAxis, {
+            scale: scale,
+            view: view,
+            margins: margins,
+            tickValues: tickValues,
+            orientation: orientation,
+            labelFn: labelFn
+        });
+    };
+
+    ScatterChart.prototype.buildScatterPlot = function buildScatterPlot(data, xScale, yScale, xField, yField) {
+        return React.createElement(AnimatedScatterPlot, {
+            data: data,
+            xScale: xScale,
+            yScale: yScale,
+            xField: xField,
+            yField: yField
+        });
+    };
+
+    ScatterChart.prototype.render = function render() {
+        var _props = this.props;
+        var yField = _props.yField;
+        var xField = _props.xField;
+        var data = _props.data;
+        var size = _props.size;
+        var margins = _props.margins;
+
+        var width = size[0] - margins[1] - margins[3];
+        var height = size[1] - margins[0] - margins[2];
+        var view = [width, height];
+        var xExtent = d3.extent(data, function(datum) {
+            return datum[xField];
+        });
+        var yExtent = d3.extent(data, function(datum) {
+            return datum[yField];
+        });
+        var xScale = d3.scaleLinear().domain([xExtent[0] - 1, xExtent[1] + 1]).range([0, width]);
+        var yScale = d3.scaleLinear().domain([yExtent[0] - 1, yExtent[1] + 1]).range([height, 0]);
+        var viewBox = '0 0 ' + size[0] + ' ' + size[1];
+        var transform = 'translate(' + margins[3] + ', ' + margins[0] + ')';
+        return React.createElement(
+            'svg', {
+                viewBox: viewBox
+            },
+            React.createElement(
+                'g', {
+                    transform: transform
+                },
+                this.buildHorizontalAxis(xScale, view, margins),
+                this.buildVerticalAxis(yScale, view, margins),
+                this.buildScatterPlot(data, xScale, yScale, xField, yField)
+            )
+        );
+    };
+
+    return ScatterChart;
+}(React.Component), _class.propTypes = {
+    data: React.PropTypes.array.isRequired,
+    margins: React.PropTypes.array.isRequired,
+    size: React.PropTypes.array.isRequired,
+    yField: React.PropTypes.string.isRequired,
+    xField: React.PropTypes.string.isRequired
+}, _temp);
+var ScatterPoint = (_temp3 = _class2 = function(_React$Component2) {
+    _inherits(ScatterPoint, _React$Component2);
+
+    function ScatterPoint() {
+        var _temp2, _this2, _ret;
+
+        _classCallCheck(this, ScatterPoint);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp2 = (_this2 = _possibleConstructorReturn(this, _React$Component2.call.apply(_React$Component2, [this].concat(args))), _this2), _this2.transitionDuration = 1000, _temp2), _possibleConstructorReturn(_this2, _ret);
+    }
+
+    ScatterPoint.prototype.onEnter = function onEnter(next) {
+        var _this3 = this;
+
+        d3.select(this).transition().tween('attr.opacity', null);
+        d3.select(this).transition().duration(this.transitionDuration).ease(d3.easeLinear).tween('attr.scale', function() {
+            return function(t) {
+                d3.select(_this3.circle).style('opacity', t);
+                if (t === 1) {
+                    next();
+                }
+            };
+        });
+    };
+
+    ScatterPoint.prototype.onLeave = function onLeave(next) {
+        var _this4 = this;
+
+        d3.select(this).transition().tween('attr.opacity', null);
+        d3.select(this).transition().duration(this.transitionDuration).ease(d3.easeLinear).tween('attr.scale', function() {
+            return function(t) {
+                d3.select(_this4.circle).style('opacity', 1 - t);
+                if (t === 1) {
+                    next();
+                }
+            };
+        });
+    };
+
+    ScatterPoint.prototype.render = function render() {
+        var _this5 = this;
+
+        var _props2 = this.props;
+        var cx = _props2.cx;
+        var cy = _props2.cy;
+
+        var r = 3;
+        var fill = 'steelblue';
+        var className = "scatter-chart__point";
+        var ref = function ref(c) {
+            return _this5.circle = c;
+        };
+        return React.createElement('circle', {
+            r: r,
+            cx: cx,
+            cy: cy,
+            fill: fill,
+            className: className,
+            ref: ref
+        });
+    };
+
+    return ScatterPoint;
+}(React.Component), _class2.propTypes = {
+    cx: React.PropTypes.number.isRequired,
+    cy: React.PropTypes.number.isRequired
+}, _temp3);
+var ScatterPlot = (_temp4 = _class3 = function(_React$Component3) {
+    _inherits(ScatterPlot, _React$Component3);
+
+    function ScatterPlot(props) {
+        _classCallCheck(this, ScatterPlot);
+
+        var _this6 = _possibleConstructorReturn(this, _React$Component3.call(this, props));
+
+        var data = _this6.props.data;
+
+        var dataLookup = data.map(function(datum) {
+            var _ref2;
+
+            return _ref2 = {}, _ref2[datum.key] = {
+                datum: datum,
+                state: 'default'
+            }, _ref2;
+        }).reduce(function(p, c) {
+            return _extends({}, p, c);
+        }, {});
+        _this6.state = {
+            dataLookup: dataLookup,
+            enteringData: {},
+            leavingData: {}
+        };
+        _this6.pointLookup = {};
+        return _this6;
+    }
+
+    ScatterPlot.prototype.componentWillReceiveProps = function componentWillReceiveProps(_ref3) {
+        var data = _ref3.data;
+        // figures out what data is entering and leaving
+        var newDataLookup = data.map(function(datum) {
+            var _ref4;
+
+            return _ref4 = {}, _ref4[datum.key] = {
+                datum: datum,
+                state: 'default'
+            }, _ref4;
+        }).reduce(function(p, c) {
+            return _extends({}, p, c);
+        }, {});
+        var dataLookup = this.state.dataLookup;
+
+        var leavingData = _extends({}, dataLookup);
+        var enteringData = _extends({}, newDataLookup);
+        Object.keys(leavingData).forEach(function(key) {
+            if (newDataLookup[key]) {
+                delete leavingData[key];
+            }
+        });
+        Object.keys(enteringData).forEach(function(key) {
+            if (dataLookup[key]) {
+                delete enteringData[key];
+            }
+        });
+        this.setState({
+            dataLookup: _extends({}, leavingData, newDataLookup),
+            enteringData: enteringData,
+            leavingData: leavingData
+        });
+    };
+
+    ScatterPlot.prototype.componentDidUpdate = function componentDidUpdate() {
+        var _this7 = this;
+
+        // calls `onEnter` and `onLeave` on the child component instances
+        var _state = this.state;
+        var enteringData = _state.enteringData;
+        var leavingData = _state.leavingData;
+
+        Object.keys(enteringData).forEach(function(key) {
+            var data = enteringData[key];
+            if (data.state === 'entering') {
+                return;
+            }
+            data.state = 'entering';
+            _this7.pointLookup[key].onEnter(function() {
+                data.state = 'default';
+                updateFn();
+            });
+        });
+        var updateFn = _.debounce(function() {
+            _this7.setState({
+                dataLookup: _this7.state.dataLookup
+            });
+        }, 100);
+        Object.keys(leavingData).forEach(function(key) {
+            var data = leavingData[key];
+            if (data.state === 'leaving') {
+                return;
+            }
+            data.state = 'leaving';
+            _this7.pointLookup[key].onLeave(function() {
+                delete _this7.state.dataLookup[key];
+                updateFn();
+            });
+        });
+    };
+
+    ScatterPlot.prototype.buildPoints = function buildPoints(data, xScale, yScale, xField, yField) {
+        var _this8 = this;
+
+        return data.map(function(datum) {
+            var cx = xScale(datum[xField]);
+            var cy = yScale(datum[yField]);
+            var key = datum.key;
+
+            var ref = function ref(c) {
+                return _this8.pointLookup[key] = c;
+            };
+            var state = _this8.state.dataLookup[key].state;
+
+            var opacity = 1;
+            if (state === 'entering') {
+                opacity = 0;
+                console.log('entering');
+            }
+            return React.createElement(ScatterPoint, {
+                cx: cx,
+                cy: cy,
+                key: key,
+                ref: ref,
+                opacity: opacity
+            });
+        });
+    };
+
+    ScatterPlot.prototype.render = function render() {
+        var _props3 = this.props;
+        var xScale = _props3.xScale;
+        var yScale = _props3.yScale;
+        var xField = _props3.xField;
+        var yField = _props3.yField;
+        var dataLookup = this.state.dataLookup;
+
+        var data = Object.keys(dataLookup).map(function(key) {
+            return dataLookup[key].datum;
+        });
+        return React.createElement(
+            'g', {
+                transform: 'translate(0, 0)'
+            },
+            this.buildPoints(data, xScale, yScale, xField, yField)
+        );
+    };
+
+    return ScatterPlot;
+}(React.Component), _class3.propTypes = {
+    xScale: React.PropTypes.func.isRequired,
+    yScale: React.PropTypes.func.isRequired,
+    yField: React.PropTypes.string.isRequired,
+    xField: React.PropTypes.string.isRequired,
+    data: React.PropTypes.array.isRequired
+}, _temp4);
+
+var AnimatedVerticalAxis = AnimatedScaleWrapper(['scale'], 1000)(VerticalAxis);
+var AnimatedHorizontalAxis = AnimatedScaleWrapper(['scale'], 1000)(HorizontalAxis);
+var AnimatedScatterPlot = AnimatedScaleWrapper(['xScale', 'yScale'], 1000)(ScatterPlot);
+</script>

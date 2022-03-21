@@ -3,8 +3,8 @@ import axios from "axios";
 
 
 const http = axios.create({
-  baseURL:'http://api-mysite.com:9999/',
-  // baseURL:'http://127.0.0.1:9998/',
+  // baseURL:'http://localhost:9999/',
+  baseURL:'http://127.0.0.1:9998/',
   timeout:10000
 })
 
@@ -44,10 +44,11 @@ export const getDetail = (params) =>{
 
 //跟新数据
 export const updateUser = (data)=>{
+  console.log(data,123);
   return http({
     url:'users/update-user',
     method:'PUT',
-    data
+    data:data
   })
 }
 
@@ -64,11 +65,30 @@ export const deleteUser = (data) =>{
 //图片上传
 export const uploadImg = (data)=>{
   return http({
-    url:'users/upload',
+    url:'upload',
     method:'POST',
     data:data,
     headers:{
       'Content-Type': 'multipart/form-data'
     }
+  })
+}
+
+//新建首页配置
+
+export const updateHomeSetting = (data)=>{
+  return http({
+    url:'home/update',
+    method:'PUT',
+    data
+  })
+}
+//获取首页配置
+
+
+export const getHomeDetail = ()=>{
+  return http({
+    url:'home/detail',
+    method:'GET'
   })
 }

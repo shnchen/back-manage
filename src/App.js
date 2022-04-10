@@ -1,6 +1,6 @@
 import React,{useEffect, useState} from 'react';
 import {Routes,Route, useNavigate, useLocation } from 'react-router-dom';
-import { Menu } from 'antd';
+import { Menu,Row,Col } from 'antd';
 import './App.scss';
 import routers from './router';
 
@@ -19,7 +19,28 @@ const  App = () => {
   },[location.pathname])
   return (
     <div className='app'>
-      <Menu className='menu'
+      <Row>
+        <Col span={4}>
+            <Menu className='menu'
+              style={{height:'100vh'}}
+              selectedKeys={[current]}
+              onClick={(e)=>{handleClick(e)}} 
+              theme='dark' mode='vertical'>
+              {routers.map(item => {
+                if(item.name){
+                  return <Menu.Item key={item.path}>{item.name}</Menu.Item>
+                } 
+                return <></>
+              })}
+            </Menu>
+          </Col>
+        <Col span={20}  style={{height:'100vh',overflowY:'auto'}}>
+          <Routes>
+          {routers.map(item=>{return<Route key={item.path} path={item.path} exact element={<item.element />} />})}
+          </Routes>
+        </Col>
+      </Row>
+      {/* <Menu className='menu'
        selectedKeys={[current]}
         onClick={(e)=>{handleClick(e)}} 
         theme='dark' mode='horizontal'>
@@ -32,7 +53,7 @@ const  App = () => {
       </Menu>
      <Routes>
          {routers.map(item=>{return<Route key={item.path} path={item.path} exact element={<item.element />} />})}
-    </Routes>
+    </Routes> */}
     </div>
   );
 }

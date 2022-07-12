@@ -1,8 +1,11 @@
-import React,{useState} from 'react';
+import React,{useState,createContext} from 'react';
 import {Button,notification,Card,Row,Col} from 'antd'
 import BraftEditor from 'braft-editor';
 import 'braft-editor/dist/index.css'
 import 'braft-editor/dist/output.css'
+import A from '../../components/a';
+import {debounce,throttle} from '../../utils'
+export const Context = createContext();
 const controls =[
           'undo', 'redo', 'separator',
           'font-size', 'line-height', 'letter-spacing', 'separator',
@@ -16,7 +19,6 @@ const controls =[
 const List = ()=>{
   const [editorState,setEditorState] = useState(BraftEditor.createEditorState(null));
   const onEditorChange = (newContent)=>{
-    console.log(newContent.toHTML());
     setEditorState(newContent)
   }
   
@@ -29,6 +31,8 @@ const List = ()=>{
         }}}
         controls={controls}
       /> 
+      <Context.Provider value={editorState.toHTML()}><A /></Context.Provider>
+      <button onClick={throttle(()=>{console.log(12);},1000)}>点击</button>
     </div>
   )
 }

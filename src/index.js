@@ -6,6 +6,12 @@ import store from './store'
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+// import VConsole from 'vconsole';
+
+// const vConsole = new VConsole();
+// or init with options
+// const vConsole = new VConsole({ theme: 'dark' });
+console.log(process.env);
 ReactDOM.render(
   <Provider store={store}>
     <BrowserRouter>
@@ -14,7 +20,6 @@ ReactDOM.render(
       </React.StrictMode>
     </BrowserRouter>
   </Provider>
-  
 ,
   document.getElementById('root')
 );

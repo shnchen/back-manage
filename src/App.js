@@ -6,7 +6,7 @@ import routers from './router';
 
 const  App = () => {
   let navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
     const [current,setCurrent] = useState(location.pathname==='/'?'/home':location.pathname),
     handleClick = e => {
       navigate(e.key);
